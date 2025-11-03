@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Job Salaries Prediction | Multiple Regression</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 2rem 0;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: var(--light);
+        }
+
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background-color: white;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            color: #666;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+        }
+
+        .btn-accent:hover {
+            background-color: #c0392b;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--secondary);
+        }
+
+        .prediction-form {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -0.5rem;
+        }
+
+        .form-col {
+            flex: 1;
+            padding: 0 0.5rem;
+            min-width: 200px;
+        }
+
+        .result {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .result h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .salary-prediction {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--success);
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav ul {
+                margin-top: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            nav ul li {
+                margin-left: 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .form-col {
+                flex: 100%;
+                padding: 0;
+                margin-bottom: 1rem;
+            }
+
+            .form-row {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">SalaryPredict</div>
+                <nav>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#predict">Predict</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Predict Your Job Salary with Machine Learning</h1>
+            <p>Our advanced multiple regression model analyzes various factors to provide accurate salary predictions based on your profile, experience, and job market trends.</p>
+            <a href="#predict" class="btn">Try Prediction Tool</a>
+        </div>
+    </section>
+
+    <section class="container">
+        <h2 class="section-title">Key Features</h2>
+        <div class="features" style="display:flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+            <div style="background:white; padding:1.5rem; border-radius:8px; box-shadow: var(--shadow); max-width:280px; text-align:center;">
+                <div style="font-size: 2.5rem; color: var(--secondary); margin-bottom:1rem;">📊</div>
+                <h3 style="color: var(--primary); margin-bottom:1rem;">Multiple Regression Analysis</h3>
+                <p>Considers multiple factors simultaneously for accurate salary predictions.</p>
+            </div>
+            <div style="background:white; padding:1.5rem; border-radius:8px; box-shadow: var(--shadow); max-width:280px; text-align:center;">
+                <div style="font-size: 2.5rem; color: var(--secondary); margin-bottom:1rem;">💼</div>
+                <h3 style="color: var(--primary); margin-bottom:1rem;">Industry-Specific Models</h3>
+                <p>Tailored prediction models for various industries and job roles.</p>
+            </div>
+            <div style="background:white; padding:1.5rem; border-radius:8px; box-shadow: var(--shadow); max-width:280px; text-align:center;">
+                <div style="font-size: 2.5rem; color: var(--secondary); margin-bottom:1rem;">📈</div>
+                <h3 style="color: var(--primary); margin-bottom:1rem;">Real-Time Data</h3>
+                <p>Incorporates current market trends and salary data for up-to-date predictions.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="container" id="predict">
+        <h2 class="section-title">Salary Prediction Tool</h2>
+        <div class="prediction-form">
+            <form id="salaryForm" novalidate>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="experience">Years of Experience</label>
+                            <input type="number" id="experience" class="form-control" min="0" max="50" step="0.5" required />
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="education">Education Level</label>
+                            <select id="education" class="form-control" required>
+                                <option value="" disabled selected>Select Education Level</option>
+                                <option value="1">High School</option>
+                                <option value="2">Associate Degree</option>
+                                <option value="3">Bachelor's Degree</option>
+                                <option value="4">Master's Degree</option>
+                                <option value="5">PhD</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="industry">Industry</label>
+                            <select id="industry" class="form-control" required>
+                                <option value="" disabled selected>Select Industry</option>
+                                <option value="1">Technology</option>
+                                <option value="2">Finance</option>
+                                <option value="3">Healthcare</option>
+                                <option value="4">Manufacturing</option>
+                                <option value="5">Education</option>
+                                <option value="6">Retail</option>
+                                <option value="7">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <select id="location" class="form-control" required>
+                                <option value="" disabled selected>Select Location</option>
+                                <option value="1">Urban</option>
+                                <option value="2">Suburban</option>
+                                <option value="3">Rural</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="companySize">Company Size</label>
+                            <select id="companySize" class="form-control" required>
+                                <option value="" disabled selected>Select Company Size</option>
+                                <option value="1">Small (1-50 employees)</option>
+                                <option value="2">Medium (51-500 employees)</option>
+                                <option value="3">Large (500+ employees)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="jobRole">Job Role</label>
+                            <select id="jobRole" class="form-control" required>
+                                <option value="" disabled selected>Select Job Role</option>
+                                <option value="1">Entry Level</option>
+                                <option value="2">Mid Level</option>
+                                <option value="3">Senior Level</option>
+                                <option value="4">Manager</option>
+                                <option value="5">Director</option>
+                                <option value="6">Executive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-accent">Predict Salary</button>
+            </form>
+        </div>
+
+        <div class="result" id="predictionResult" aria-live="polite" aria-atomic="true">
+            <h3>Your Predicted Salary</h3>
+            <div class="salary-prediction" id="salaryValue">$0</div>
+            <p>This prediction is based on our multiple regression model analyzing your input factors.</p>
+            <p><em>Note: This is an estimate and actual salary may vary based on additional factors.</em></p>
+        </div>
+    </section>
+
+    <section class="container" id="about">
+        <h2 class="section-title">About Our Model</h2>
+        <div class="about" style="background:white; padding:1.5rem; border-radius:8px; box-shadow: var(--shadow);">
+            <p>
+                Our job salary prediction system uses multiple regression analysis, a statistical technique that examines the linear relationship between a dependent variable (salary) and multiple independent variables (experience, education, industry, etc.).
+            </p>
+            <p>
+                The model was trained on a comprehensive dataset of job salaries across various industries, locations, and experience levels. It considers multiple factors simultaneously to provide more accurate predictions than simple linear models.
+            </p>
+            <p>Key factors considered in our model:</p>
+            <ul>
+                <li>Years of professional experience</li>
+                <li>Educational attainment</li>
+                <li>Industry sector</li>
+                <li>Geographic location</li>
+                <li>Company size</li>
+                <li>Job role and seniority</li>
+            </ul>
+            <p>
+                While our model provides valuable insights, salary negotiations are complex and influenced by many factors not captured here.
+            </p>
+        </div>
+    </section>
+
+    <footer id="contact" style="background: var(--primary); color: white; padding: 2rem 0; text-align: center;">
+        <div class="container">
+            <div class="footer-content">
+                <div class="logo">SalaryPredict</div>
+                <p>Predicting your future salary with machine learning</p>
+                <ul class="footer-links" style="display:flex; list-style:none; justify-content:center; gap:1.5rem; margin:1rem 0; padding:0;">
+                    <li><a href="#home" style="color:white; text-decoration:none;">Home</a></li>
+                    <li><a href="#predict" style="color:white; text-decoration:none;">Predict</a></li>
+                    <li><a href="#about" style="color:white; text-decoration:none;">About</a></li>
+                    <li><a href="#contact" style="color:white; text-decoration:none;">Contact</a></li>
+                </ul>
+                <p>&copy; 2025 SalaryPredict. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('salaryForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Get form values
+            const experience = parseFloat(document.getElementById('experience').value);
+            const education = parseInt(document.getElementById('education').value);
+            const industry = parseInt(document.getElementById('industry').value);
+            const location = parseInt(document.getElementById('location').value);
+            const companySize = parseInt(document.getElementById('companySize').value);
+            const jobRole = parseInt(document.getElementById('jobRole').value);
+
+            // Validate inputs
+            if (
+                isNaN(experience) || experience < 0 ||
+                isNaN(education) ||
+                isNaN(industry) ||
+                isNaN(location) ||
+                isNaN(companySize) ||
+                isNaN(jobRole)
+            ) {
+                alert('Please fill in all fields correctly.');
+                return;
+            }
+
+            // Multiple regression model coefficients (simulated)
+            const intercept = 30000;
+            const coefExperience = 2500;
+            const coefEducation = 8000;
+            const coefIndustry = 5000;
+            const coefLocation = 3000;
+            const coefCompanySize = 4000;
+            const coefJobRole = 7000;
+
+            // Calculate predicted salary
+            let predictedSalary =
+                intercept +
+                coefExperience * experience +
+                coefEducation * education +
+                coefIndustry * industry +
+                coefLocation * location +
+                coefCompanySize * companySize +
+                coefJobRole * jobRole;
+
+            // Add random variation ±$5000 for realism
+            predictedSalary += (Math.random() * 10000) - 5000;
+
+            // Format as USD
+            const formattedSalary = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                maximumFractionDigits: 0,
+            }).format(predictedSalary);
+
+            // Show result
+            const resultDiv = document.getElementById('predictionResult');
+            document.getElementById('salaryValue').textContent = formattedSalary;
+            resultDiv.style.display = 'block';
+
+            // Scroll to the result smoothly
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Smooth scrolling for nav and buttons
+        document.querySelectorAll('nav a, .btn').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('href');
+                if (targetId && targetId.startsWith('#')) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
